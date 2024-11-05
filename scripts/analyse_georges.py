@@ -29,30 +29,31 @@ df = pd.concat([df, df_fond_mean]).sort_index()
 
 concentration_tumeur = 18000 # Bq/mL
 
-concentration, CNR_T_foie, CNR_T, SNR_T_foie = [], [], [], []
+concentration, CNR_T, SNR_T = [], [], []
 for it in range(3, 7, 1):
     for gauss in range(0, 5, 2):
         for tum in ['T1', 'T2', 'T3', 'T4', 'T foie']:
             concentration.append(df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc[tum, 'Moyenne (BQML)'])
-            CNR_T_foie.append((df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc['T foie', 'Moyenne (BQML)'] - df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc['Fond foie', 'Moyenne (BQML)']) / df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc['Fond foie', 'Déviation standard (BQML)'])
-            CNR_T.append((df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc[tum, 'Moyenne (BQML)'] - df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc['Moyenne Fond', 'Moyenne (BQML)']) / df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc['Moyenne Fond', 'Déviation standard (BQML)'])
-            SNR_T_foie.append(df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc['T foie', 'Moyenne (BQML)'] / df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc['Fond foie', 'Déviation standard (BQML)'])
+            if tum == 'T foie':
+                CNR_T.append((df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc[tum, 'Moyenne (BQML)'] - df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc['Fond foie', 'Moyenne (BQML)']) / df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc['Fond foie', 'Déviation standard (BQML)'])
+                SNR_T.append(df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc[tum, 'Moyenne (BQML)'] / df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc['Fond foie', 'Déviation standard (BQML)'])
+            else:
+                CNR_T.append((df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc[tum, 'Moyenne (BQML)'] - df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc['Moyenne Fond', 'Moyenne (BQML)']) / df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc['Moyenne Fond', 'Déviation standard (BQML)'])
+                SNR_T.append(df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc[tum, 'Moyenne (BQML)'] / df.xs(it, level='Itérations').xs(gauss, level='Gaussien (mm)').loc['Moyenne Fond', 'Déviation standard (BQML)'])
 
 iteration = sorted([f for f in range(3, 7, 1)] * 5 * 3)
 gaussien = sorted([f for f in range(0, 5, 2)] * 5) * 4
 tumeur = ['T1', 'T2', 'T3', 'T4', 'T Foie'] * 12
 
-df_CNR = pd.DataFrame.from_records([iteration, gaussien, tumeur, concentration]).T
-df_CNR.columns = ['Itération', 'Gaussien (mm)', 'Tumeur', 'Concentration (Bq/mL)']
-df_CNR = df_CNR.set_index(['Itération', 'Gaussien (mm)', 'Tumeur'])
-df_CNR['Ecart concentration (Bq/mL)'] = concentration_tumeur - df_CNR['Concentration (Bq/mL)']
-df_CNR['Ecart concentration carré (Bq/mL)^2'] = (concentration_tumeur - df_CNR['Concentration (Bq/mL)'])**2
-df_CNR['CNR Tumeur'] = CNR_T
-df_CNR['CNR Tumeur foie'] = CNR_T_foie
-df_CNR['SNR Tumeur foie'] = SNR_T_foie
-df_CNR['SNR^2 Tumeur foie'] = df_CNR['SNR Tumeur foie']**2
+df_metrique = pd.DataFrame.from_records([iteration, gaussien, tumeur, concentration]).T
+df_metrique.columns = ['Itération', 'Gaussien (mm)', 'Tumeur', 'Concentration (Bq/mL)']
+df_metrique = df_metrique.set_index(['Itération', 'Gaussien (mm)', 'Tumeur'])
+df_metrique['Ecart concentration (Bq/mL)'] = concentration_tumeur - df_metrique['Concentration (Bq/mL)']
+df_metrique['Ecart concentration carré (Bq/mL)^2'] = (concentration_tumeur - df_metrique['Concentration (Bq/mL)'])**2
+df_metrique['CNR Tumeur'] = CNR_T
+df_metrique
 
 
-# df.to_csv('output/resultats_bruts_MiM_python_mesure1.csv')
-# df_CNR.to_csv('output/resultats_CNR_MiM_python_mesure1.csv')
-print(df_CNR)
+df.to_csv('output/resultats_bruts_MiM_python_mesure1.csv')
+df_metrique.to_csv('output/resultats_CNR_MiM_python_mesure1.csv')
+print(df)
