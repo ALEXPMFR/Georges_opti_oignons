@@ -2,7 +2,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from pathlib import Path
 
-df = pd.read_csv('Analyse_stats_mesure1.csv')
+mesure = '1'
+
+df = pd.read_csv('Analyse_stats_mesure' + mesure + '.csv')
 
 iteration, gaussien = [], []
 for el in df['Description des séries']:
@@ -51,9 +53,8 @@ df_metrique = df_metrique.set_index(['Itération', 'Gaussien (mm)', 'Tumeur'])
 df_metrique['Ecart concentration (Bq/mL)'] = concentration_tumeur - df_metrique['Concentration (Bq/mL)']
 df_metrique['Ecart concentration carré (Bq/mL)^2'] = (concentration_tumeur - df_metrique['Concentration (Bq/mL)'])**2
 df_metrique['CNR Tumeur'] = CNR_T
-df_metrique
+df_metrique['SNR Tumeur'] = SNR_T
 
-
-df.to_csv('output/resultats_bruts_MiM_python_mesure1.csv')
-df_metrique.to_csv('output/resultats_CNR_MiM_python_mesure1.csv')
+df.to_csv('output/resultats_bruts_MiM_python_mesure' + mesure + '.csv')
+df_metrique.to_csv('output/resultats_CNR_MiM_python_mesure' + mesure + '.csv')
 print(df)
